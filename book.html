@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CommuteShare Driver Route</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; }
+        #map { height: 100vh; width: 100vw; }
+
+        /* Profile image inside marker with larger size */
+        .profile-marker {
+            width: 80px;
+            height: 80px;
+            background-image: url('images/profile.png'); /* Change this URL to your image */
+            background-size: cover;
+            background-position: center;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .marker-popup {
+            font-size: 1.2em;
+            color: #333;
+            text-align: center;
+            padding-top: 5px;
+        }
+
+        .price {
+            font-weight: bold;
+            color: #28a745;
+            font-size: 1.1em;
+        }
+
+        .schedule {
+            font-size: 1em;
+            color: #555;
+            margin-top: 10px;
+        }
+
+        .schedule span {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        /* Form overlay styles */
+        #routeForm {
+            position: absolute;
+            top: 90px;
+            left: 70px;
+            width: 300px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+        }
+
+        h2 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            color: #333;
+            text-align: center;
+        }
+
+        label {
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-top: 10px;
+            color: #555;
+        }
+
+        input[type="text"], input[type="time"], .checkbox-group {
+            width: 100%;
+            margin-top: 5px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .checkbox-group label {
+            font-weight: normal;
+            font-size: 0.9em;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-top: 15px;
+            font-size: 1em;
+            cursor: pointer;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+  <!-- Header with Navbar -->
+  <header class="bg-dark text-white py-3">
+    <div class="container d-flex justify-content-between align-items-center">
+      <h1 class="h3 mb-0"><a href="index.html" class="text-white text-decoration-none">CommuteShare</a></h1>
+      <nav>
+        <ul class="nav">
+          <li class="nav-item"><a href="/book.html" class="nav-link text-white">Book</a></li>
+          <li class="nav-item"><a href="/calculator.html" class="nav-link text-white">Calculator</a></li>
+          <li class="nav-item"><a href="/stats.html" class="nav-link text-white">Stats</a></li>
+          <li class="nav-item"><a href="/driver.html" class="nav-link text-white">Driver</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+  <script>
+    // Initialize the map
+    const map = L.map('map').setView([43.7315, -79.7624], 12);
+
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Predefined start and end locations
+    const startLocation = [43.7315, -79.7624];  // Example start location (latitude, longitude)
+    const endLocation = [43.7, -79.8];  // Example end location (latitude, longitude)
+
+    // Create a new route from start to end
+    L.Routing.control({
+        waypoints: [
+            L.latLng(startLocation[0], startLocation[1]),
+            L.latLng(endLocation[0], endLocation[1])
+        ],
+        routeWhileDragging: false,
+        createMarker: function() { return null; }  // Hide markers
+    }).addTo(map);
+
+    // Add a custom marker with profile image and price at the start location
+    const marker = L.marker([43.7315, -79.7624], {
+        icon: L.divIcon({
+            className: 'profile-marker',
+            iconSize: [80, 80],  // Increased size for the profile marker
+            iconAnchor: [40, 80]  // Adjusted to anchor the marker properly
+        })
+    }).addTo(map);
+
+    // Display the info directly in a popup (no need for a click)
+    marker.bindPopup(`
+        <div class="marker-popup">
+            <div>Driver</div>
+            <div class="price">$5 per trip</div>
+            <div class="schedule">
+                <span><strong>Schedule:</strong></span>
+                <span>Mon - Fri</span>
+                <span>Leave at 9:00 AM</span>
+                <span>Return by 5:00 PM</span>
+            </div>
+        </div>
+    `).openPopup();  // Open the popup immediately when the page loads
+  </script>
+
+</body>
+</html>

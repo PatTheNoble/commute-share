@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CommuteShare Driver Route</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; }
+        #map { height: 100vh; width: 100vw; }
+
+        /* Form overlay styles */
+        #routeForm {
+            position: absolute;
+            top: 90px;
+            left: 70px;
+            width: 300px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+        }
+
+        h2 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            color: #333;
+            text-align: center;
+        }
+
+        label {
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-top: 10px;
+            color: #555;
+        }
+
+        input[type="text"], input[type="time"], .checkbox-group {
+            width: 100%;
+            margin-top: 5px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .checkbox-group label {
+            font-weight: normal;
+            font-size: 0.9em;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-top: 15px;
+            font-size: 1em;
+            cursor: pointer;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+  <!-- Header with Navbar -->
+  <header class="bg-dark text-white py-3">
+    <div class="container d-flex justify-content-between align-items-center">
+      <h1 class="h3 mb-0"><a href="index.html" class="text-white text-decoration-none">CommuteShare</a></h1>
+      <nav>
+        <ul class="nav">
+          <li class="nav-item"><a href="/book.html" class="nav-link text-white">Book</a></li>
+          <li class="nav-item"><a href="/calculator.html" class="nav-link text-white">Calculator</a></li>
+          <li class="nav-item"><a href="/stats.html" class="nav-link text-white">Stats</a></li>
+          <li class="nav-item"><a href="/driver.html" class="nav-link text-white">Driver</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Route Form -->
+  <div id="routeForm">
+    <h2>Driver Commute Details</h2>
+    
+    <label>Workdays:</label>
+    <div class="checkbox-group">
+        <label><input type="checkbox" id="Monday" checked> Mon</label>
+        <label><input type="checkbox" id="Tuesday" checked> Tue</label>
+        <label><input type="checkbox" id="Wednesday" checked> Wed</label>
+        <label><input type="checkbox" id="Thursday" checked> Thu</label>
+        <label><input type="checkbox" id="Friday" checked> Fri</label>
+        <label><input type="checkbox" id="Saturday"> Sat</label>
+        <label><input type="checkbox" id="Sunday"> Sun</label>
+    </div>
+
+    <label for="startTime">Start Time:</label>
+    <input type="time" id="startTime" value="09:00" required>
+
+    <label for="endTime">End Time:</label>
+    <input type="time" id="endTime" value="17:00" required>
+
+    <label for="startLocation">Route Start Location (Latitude, Longitude):</label>
+    <input type="text" id="startLocation" value="43.7315, -79.7624" required>
+
+    <label for="endLocation">Route End Location (Latitude, Longitude):</label>
+    <input type="text" id="endLocation" value="43.7, -79.8" required>
+
+    <button onclick="displayRoute()">Save and Display Route</button>
+  </div>
+
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+  <script>
+    // Initialize the map
+    const map = L.map('map').setView([43.7315, -79.7624], 12);
+
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    let routingControl; // Variable to hold the route control
+
+    function displayRoute() {
+        // Get form values
+        const startLocation = document.getElementById('startLocation').value.split(',').map(Number);
+        const endLocation = document.getElementById('endLocation').value.split(',').map(Number);
+
+        // Validate if the coordinates are valid
+        if (startLocation.length !== 2 || isNaN(startLocation[0]) || isNaN(startLocation[1]) || startLocation[0] < -90 || startLocation[0] > 90 || startLocation[1] < -180 || startLocation[1] > 180) {
+            alert('Invalid start location coordinates.');
+            return;
+        }
+
+        if (endLocation.length !== 2 || isNaN(endLocation[0]) || isNaN(endLocation[1]) || endLocation[0] < -90 || endLocation[0] > 90 || endLocation[1] < -180 || endLocation[1] > 180) {
+            alert('Invalid end location coordinates.');
+            return;
+        }
+
+        // If route control exists, remove it
+        if (routingControl) {
+            routingControl.remove(); // Remove existing route if there is one
+        }
+
+        // Create a new route from start to end
+        routingControl = L.Routing.control({
+            waypoints: [
+                L.latLng(startLocation[0], startLocation[1]),
+                L.latLng(endLocation[0], endLocation[1])
+            ],
+            routeWhileDragging: false,
+            createMarker: function() { return null; }  // Hide markers
+        }).addTo(map);
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carpool Earnings Calculator</title>
+    <style>
+        /* Base styling */
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #1c1e21;
+            color: #f4f4f9;
+            position: relative;
+        }
+
+        .container {
+            max-width: 400px;
+            padding: 20px;
+            background: #222;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        h2 {
+            font-size: 24px;
+            color: #fff;
+        }
+
+        /* Home link */
+        .home-link {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 18px;
+            color: #00ffcc;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .home-link:hover {
+            text-decoration: underline;
+        }
+
+        label {
+            display: block;
+            margin: 15px 0 5px;
+            font-weight: bold;
+        }
+
+        .slider-container {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            -webkit-appearance: none;
+            background: linear-gradient(90deg, #00ffcc, #0073e6);
+            height: 10px;
+            border-radius: 5px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border: 2px solid #0073e6;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border: 2px solid #0073e6;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .value-display {
+            font-size: 1.4em;
+            color: #00ffcc;
+            transition: color 0.3s ease;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .calculate-button {
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            background-color: #0073e6;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .calculate-button:hover {
+            background-color: #005bb5;
+        }
+
+        .output {
+            font-weight: bold;
+            font-size: 1.2em;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out, transform 0.8s ease-in-out;
+            transform: translateY(20px);
+        }
+
+        .output.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .earnings-value {
+            font-size: 2em;
+            color: #00ffcc;
+            margin-top: 20px;
+        }
+
+        .earnings-text {
+            font-size: 1.5em;
+            color: #f4f4f9;
+        }
+
+        .stretched-glow {
+            animation: stretchGlow 0.4s ease-in-out;
+            color: #ffcc00;
+            text-shadow: 0 0 15px #ffcc00, 0 0 20px #ffcc00, 0 0 25px #ffcc00;
+        }
+
+        @keyframes stretchGlow {
+            0% {
+                transform: scaleY(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scaleY(1.4);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scaleY(1);
+                opacity: 1;
+            }
+        }
+
+        .value-display,
+        .earnings-value {
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .container {
+            animation: pageLoad 1.5s ease-out forwards;
+        }
+
+        @keyframes pageLoad {
+            0% {
+                opacity: 1;
+                transform: translateY(50px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .output.revealed {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 1s ease-in-out, transform 1s ease-in-out;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Home Link -->
+    <a href="index.html" class="home-link">Home</a>
+
+    <div class="container">
+        <h2>Carpool Earnings Calculator</h2>
+
+        <!-- Carpooling Settings -->
+        <label for="riders">Number of Riders: <span class="value-display" id="ridersValue">3</span></label>
+        <div class="slider-container">
+            <input type="range" id="riders" min="1" max="4" value="3" oninput="animateValueUpdate('ridersValue', this.value)">
+        </div>
+
+        <label for="chargePerRider">Charge per Rider ($): <span class="value-display" id="chargePerRiderValue">15</span></label>
+        <div class="slider-container">
+            <input type="range" id="chargePerRider" min="1" max="30" value="15" oninput="animateValueUpdate('chargePerRiderValue', this.value)">
+        </div>
+
+        <label for="carpoolDays">Carpool Days per Month: <span class="value-display" id="carpoolDaysValue">20</span></label>
+        <div class="slider-container">
+            <input type="range" id="carpoolDays" min="1" max="31" value="20" oninput="animateValueUpdate('carpoolDaysValue', this.value)">
+        </div>
+
+        <!-- Checkbox for Return Trip -->
+        <div class="checkbox-container">
+            <input type="checkbox" id="returnTrip" checked onclick="updateValues()">
+            <label for="returnTrip" style="margin-left: 8px;">Include Return Trip</label>
+        </div>
+
+        <!-- Calculate Button -->
+        <button class="calculate-button" onclick="revealEarnings()">Calculate Earnings</button>
+
+        <!-- Animated Earnings Output -->
+        <div class="output" id="earningsOutput">
+            <p class="earnings-text">Estimated Earnings:</p>
+            <p class="earnings-value" id="yearlyEarningsDisplay">$0 per year</p>
+            <p class="earnings-text">($<span id="monthlyEarningsDisplay">0</span> per month)</p>
+        </div>
+    </div>
+
+    <script>
+        let monthlyEarnings = 0;
+        let yearlyEarnings = 0;
+
+        function animateValueUpdate(id, newValue) {
+            const element = document.getElementById(id);
+            const currentValue = parseInt(element.textContent);
+            const duration = 100;
+            const frameRate = 10;
+            const totalFrames = duration / frameRate;
+            const increment = (newValue - currentValue) / totalFrames;
+
+            let frame = 0;
+            clearInterval(element.animationInterval);
+            element.animationInterval = setInterval(() => {
+                if (frame++ >= totalFrames) {
+                    clearInterval(element.animationInterval);
+                    element.textContent = newValue;
+                } else {
+                    element.textContent = Math.round(currentValue + increment * frame);
+                }
+            }, frameRate);
+
+            element.classList.add('stretched-glow');
+            setTimeout(() => {
+                element.classList.remove('stretched-glow');
+            }, 400);
+
+            const earningsOutput = document.getElementById("earningsOutput");
+            earningsOutput.classList.remove("revealed");
+
+            updateValues();
+        }
+
+        function updateValues() {
+            const riders = document.getElementById("riders").value;
+            const chargePerRider = document.getElementById("chargePerRider").value;
+            const carpoolDays = document.getElementById("carpoolDays").value;
+            const returnTrip = document.getElementById("returnTrip").checked;
+
+            monthlyEarnings = riders * chargePerRider * carpoolDays;
+            if (returnTrip) {
+                monthlyEarnings *= 2;
+            }
+            yearlyEarnings = monthlyEarnings * 12;
+        }
+
+        function revealEarnings() {
+            document.getElementById("yearlyEarningsDisplay").textContent = `$${yearlyEarnings.toFixed(2)} per year`;
+            document.getElementById("monthlyEarningsDisplay").textContent = monthlyEarnings.toFixed(2);
+
+            const earningsOutput = document.getElementById("earningsOutput");
+            earningsOutput.classList.add("revealed");
+
+            const yearlyDisplay = document.getElementById("yearlyEarningsDisplay");
+            yearlyDisplay.classList.add('stretched-glow');
+            setTimeout(() => {
+                yearlyDisplay.classList.remove('stretched-glow');
+            }, 800);
+        }
+
+        updateValues();
+    </script>
+</body>
+
+</html>
